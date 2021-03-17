@@ -1,0 +1,71 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: kubernetes-demo
+data:
+  sample.message: HELLO WORLD
+  logging.level.com: DEBUG
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: kubernetes-demo
+spec:
+  selector:
+    app: kubernetes-demo
+  ports:
+  - protocol: TCP
+    port: 8080
+    nodePort: 30081
+  type: NodePort
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-read-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  - pods
+  - services
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-read-rolebinding
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: cluster-read-role
+  apiGroup: rbac.authorization.k8s.io  
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubernetes-demo
+spec:
+  selector:
+      matchLabels:
+        app: kubernetes-demo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kubernetes-demo
+    spec:
+      containers:
+        - name: k8s-demo
+          image: k8s-demo:latest
+          imagePullPolicy: Never
+          ports:
+          - containerPort: 8080

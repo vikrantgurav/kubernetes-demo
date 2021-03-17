@@ -1,0 +1,12 @@
+spring:
+  cloud:
+    kubernetes:
+      config:
+        enabled: true
+        sources:
+          - namespace: default
+            name: minikube-sample
+management:
+  endpoint:
+    restart:
+      enabled: true
